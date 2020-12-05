@@ -1,0 +1,14 @@
+[
+  {
+    "directory": "/home/ben/test/bin",
+    "command": "cc -Icrack.p -I. -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c11 -O3 -fopenmp -MD -MQ crack.p/crack.c.o -MF crack.p/crack.c.o.d -o crack.p/crack.c.o -c ../src/crack.c",
+    "file": "../src/crack.c",
+    "output": "crack.p/crack.c.o"
+  },
+  {
+    "directory": "/home/ben/test/bin",
+    "command": "cc -Ienc.p -I. -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -std=c11 -O3 -fopenmp -MD -MQ enc.p/enc.c.o -MF enc.p/enc.c.o.d -o enc.p/enc.c.o -c ../src/enc.c",
+    "file": "../src/enc.c",
+    "output": "enc.p/enc.c.o"
+  }
+]

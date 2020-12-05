@@ -1,0 +1,1 @@
+[{"name": "openssl", "version": "1.1.1h", "compile_args": [], "link_args": ["/usr/lib/libssl.so", "/usr/lib/libcrypto.so"]}, {"name": "openmp", "version": "4.5", "compile_args": ["-fopenmp"], "link_args": ["-fopenmp"]}]
