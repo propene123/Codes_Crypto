@@ -16,12 +16,14 @@ void print_as_hex(const DES_cblock blk) {
 int main(){
     DES_cblock in = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
     const DES_cblock sec = {0x2a, 0x40, 0x72, 0x0b, 0xb5, 0x6d, 0x15, 0xd6};
-    const uint64_t runs = pow(2, 30);
+    const uint64_t runs = pow(2, 55);
+    uint64_t key_init = runs - pow(2, 30);
+
     
     DES_cblock real_key = {0x0, 0x0, 0x0, 0x0, 0x0 ,0x0 ,0x0, 0x0};
 
     #pragma omp parallel for
-    for(uint64_t key = 0; key < runs; ++key) {
+    for(uint64_t key = key_init; key < runs; ++key) {
         #pragma omp cancellation point for
         DES_cblock key_bytes;
         memcpy(key_bytes, &key, 8);
