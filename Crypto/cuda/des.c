@@ -3,11 +3,12 @@
 #include <stdio.h>
 
 static uint32_t lrot32(uint32_t in, uint8_t n) {
-  return (in << (n+4)) | (in >> (28 - n));
+  uint32_t ret = (in << n) | (in >> (28 - n));
+  return (ret & 0x0fffffff);
 }
 
 static uint64_t cat32(uint32_t left, uint32_t right) {
-  return (((uint64_t)left) << 32) | ((uint64_t)right);
+  return (((uint64_t)left) << 28) | ((uint64_t)right);
 }
 
 static uint64_t buff_to_int(unsigned char buff[8]) {
@@ -57,7 +58,7 @@ void gen_sched(unsigned char key[8], uint64_t sched[16]) {
     key_perm = 0;
     for (int j = 0; j < 48; ++j) {
       key_perm <<= 1;
-      if (sched[i] & (1ul << (64-pc2[j])))
+      if (sched[i] & (1ul << (56-pc2[j])))
         key_perm |= 1ul;
     }
     sched[i] = key_perm;
