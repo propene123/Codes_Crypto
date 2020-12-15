@@ -44,10 +44,13 @@ static uint8_t read_s_block(const uint8_t in, const uint8_t s_block[4][16]){
     return s_block[row][col];
 }
 
+static uint8_t get_mini_block(const uint64_t in, const int id) {
+    return ((in >> (8 - id)) & 0x3f);
+}
+
 static uint32_t feistel(const uint32_t in, const uint64_t key) {
     uint64_t expanded = perm(in, 32, expand, 48);
     expanded ^= key;
-    uint32_t res;
 }
 
 void gen_sched(unsigned char key[8], uint64_t sched[16]) {
