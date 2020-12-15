@@ -4,11 +4,18 @@
 
 int main() {
 
-    DES_cblock key = "abcdefgh";
+    DES_cblock key = {0x13, 0x34, 0x57, 0x79, 0x9B, 0xBC, 0xDF, 0xF1};
     DES_key_schedule sched;
     DES_set_key_unchecked(&key, &sched);
-    uint32_t left = sched.ks[0].deslong[0];
-    uint32_t right = sched.ks[0].deslong[1];
+    DES_cblock out;
+    DES_cblock in = "abcdefgh";
+    DES_ecb_encrypt(&in, &out, &sched, DES_ENCRYPT);
+
+    printf("0x");
+    for(int i = 0;i<8;++i){
+        printf("%x", out[i]);
+    }
+    printf("\n");
 
 
     return 0;

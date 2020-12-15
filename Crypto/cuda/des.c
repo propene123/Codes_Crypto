@@ -1,8 +1,7 @@
+#include "tables.h"
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "tables.h"
-
 
 static uint32_t lrot32(uint32_t in, uint8_t n) {
     uint32_t ret = (in << n) | (in >> (28 - n));
@@ -38,19 +37,29 @@ static uint64_t perm(const uint64_t in, const size_t in_length,
     return out;
 }
 
-static uint8_t read_s_block(const uint8_t in, const uint8_t s_block[4][16]){
+static uint32_t read_s_block(const uint8_t in, const uint8_t s_block[4][16],
+                             const int id) {
     const uint8_t row = (in & 1) | ((in & 0x20) >> 4);
     const uint8_t col = (in & 0x1e) >> 1;
-    return s_block[row][col];
+    return ((uint32_t)s_block[row][col]) << (CHAR_BIT * (7 - id));
 }
 
 static uint8_t get_mini_block(const uint64_t in, const int id) {
-    return ((in >> (8 - id)) & 0x3f);
+    return ((in >> (CHAR_BIT * (8 - id))) & 0x3f);
 }
 
 static uint32_t feistel(const uint32_t in, const uint64_t key) {
     uint64_t expanded = perm(in, 32, expand, 48);
     expanded ^= key;
+    uint32_t res = read_s_block(get_mini_block(expanded, 1), s1, 1) |
+                   read_s_block(get_mini_block(expanded, 2), s2, 2) |
+                   read_s_block(get_mini_block(expanded, 3), s3, 3) |
+                   read_s_block(get_mini_block(expanded, 4), s4, 4) |
+                   read_s_block(get_mini_block(expanded, 5), s5, 5) |
+                   read_s_block(get_mini_block(expanded, 6), s6, 6) |
+                   read_s_block(get_mini_block(expanded, 7), s7, 7) |
+                   read_s_block(get_mini_block(expanded, 8), s8, 8);
+    return ((uint32_t)perm(res, 32, fp, 32));
 }
 
 void gen_sched(unsigned char key[8], uint64_t sched[16]) {
@@ -90,6 +99,8 @@ void encrypt(const unsigned char in[8], unsigned char out[8],
     for (int i = 0; i < 16; ++i) {
         left = right_prev;
         right = left_prev ^ feistel(right_prev, sched[i]);
+        left_prev = left;
+        right_prev = right;
     }
     uint64_t out_int = cat32(right, left);
     out_int = perm(out_int, 64, ip1, 64);
