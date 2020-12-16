@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+
+
 static uint32_t lrot32(uint32_t in, uint8_t n) {
     uint32_t ret = (in << n) | (in >> (28 - n));
     return (ret & 0x0fffffff);
@@ -16,7 +18,7 @@ static uint64_t cat32(const uint32_t left, const uint32_t right) {
     return (((uint64_t)left) << 32) | ((uint64_t)right);
 }
 
-static uint64_t buff_to_int(const unsigned char buff[8]) {
+uint64_t buff_to_int(const unsigned char buff[8]) {
     uint64_t res = 0;
     for (int i = 0; i < 8; ++i) {
         res |= ((uint64_t)buff[i]) << (CHAR_BIT * (7 - i));
@@ -110,3 +112,4 @@ void encrypt(const unsigned char in[8], unsigned char out[8],
     out_int = perm(out_int, 64, ip1, 64);
     int_to_buff(out_int, out);
 }
+
