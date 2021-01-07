@@ -9,11 +9,28 @@ FILE_NAME = sys.argv[1]
 
 # Gen dict
 dictionary = dict()
-for i in range(256):
-    dictionary[bytes([i])] = i
+def gen_dict():
+    global dictionary
+    dictionary = dict()
+    for i in range(256):
+        dictionary[bytes([i])] = i
+    dictionary['\\section'.encode('utf-8')] = 256
+    dictionary['\\label'.encode('utf-8')] = 257
+    dictionary['\\begin'.encode('utf-8')] = 258
+    dictionary['\\paragraph'.encode('utf-8')] = 259
+    dictionary['\\end'.encode('utf-8')] = 260
+    dictionary['\\subsection'.encode('utf-8')] = 261
+    dictionary['\\text'.encode('utf-8')] = 262
+    dictionary['\\frac'.encode('utf-8')] = 263
+    dictionary['\\item'.encode('utf-8')] = 264
+    dictionary['\\align'.encode('utf-8')] = 265
+
+
+gen_dict()
+
 
 def LZW(b_array):
-    start_code = 256
+    start_code = 266
     tmp_buff = b''
     out = []
     for b in b_array:

@@ -6,12 +6,28 @@ FILE_NAME = sys.argv[1]
 
 # Gen dict
 dictionary = dict()
-for i in range(256):
-    dictionary[i] = bytes([i])
+def gen_dict():
+    global dictionary
+    dictionary = dict()
+    for i in range(256):
+        dictionary[i] = bytes([i])
+    dictionary[256] = '\\section'.encode('utf-8')
+    dictionary[257] = '\\label'.encode('utf-8')
+    dictionary[258] = '\\begin'.encode('utf-8')
+    dictionary[259] = '\\paragraph'.encode('utf-8')
+    dictionary[260] = '\\end'.encode('utf-8')
+    dictionary[261] = '\\subsection'.encode('utf-8')
+    dictionary[262] = '\\text'.encode('utf-8')
+    dictionary[263] = '\\frac'.encode('utf-8')
+    dictionary[264] = '\\item'.encode('utf-8')
+    dictionary[265] = '\\align'.encode('utf-8')
+
+
+gen_dict()
 
 
 def LZW_decode(in_codes):
-    new_key = 256
+    new_key = 266
     prev_code = in_codes[0]
     cur_char = dictionary[prev_code]
     out = []
