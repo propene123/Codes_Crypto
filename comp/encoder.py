@@ -1,5 +1,7 @@
 import sys
 from bitstring import BitArray, BitStream
+from heapq import heapify, heappush, heappop
+from functools import total_ordering
 
 
 
@@ -62,12 +64,20 @@ for key, value in prob_dict.items():
 
 
 
+@total_ordering
 class Node():
-    def __init__(self, cont, prob):
+    def __init__(self, prob, cont=None):
         self.cont = None
         self.left_child = None
         self.right_child = None
-        self.prob = None
+        self.prob = 0
+
+    def __eq__(self, x):
+        return self.prob == x.prob
+
+    def __lt__(self, x):
+        return self.prob < x.prob
+
 
     def set_right_child(self, child):
         self.right_child = child
@@ -76,8 +86,18 @@ class Node():
         self.left_child = child
 
 
+heap = []
+for key, var in prob_dict.items():
+    heap.append(Node(var, key))
+heapify(heap)
 
-
+while len(heap) != 1:
+    right_child = heappop(heap)
+    left_child = heappop(heap)
+    new_node = Node(right_child.prob + left_child.prob)
+    new_node.right_child = right_child
+    new_node.left_child = left_child
+    heappush(heap, new_node)
 
 
 
