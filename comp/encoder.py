@@ -67,10 +67,10 @@ for key, value in prob_dict.items():
 @total_ordering
 class Node():
     def __init__(self, prob, cont=None):
-        self.cont = None
+        self.cont = cont
         self.left_child = None
         self.right_child = None
-        self.prob = 0
+        self.prob = prob
 
     def __eq__(self, x):
         return self.prob == x.prob
@@ -78,6 +78,17 @@ class Node():
     def __lt__(self, x):
         return self.prob < x.prob
 
+    def get_prob(self):
+        return self.prob
+
+    def get_cont(self):
+        return self.cont
+
+    def get_right_child(self):
+        return self.right_child
+
+    def get_left_child(self):
+        return self.left_child
 
     def set_right_child(self, child):
         self.right_child = child
@@ -91,25 +102,38 @@ for key, var in prob_dict.items():
     heap.append(Node(var, key))
 heapify(heap)
 
+
 while len(heap) != 1:
     right_child = heappop(heap)
     left_child = heappop(heap)
-    new_node = Node(right_child.prob + left_child.prob)
-    new_node.right_child = right_child
-    new_node.left_child = left_child
+    new_node = Node(right_child.get_prob() + left_child.get_prob())
+    new_node.set_right_child(right_child)
+    new_node.set_left_child(left_child)
     heappush(heap, new_node)
 
+huff_code_dict = dict()
+
+
+def gen_huff_codes(cur_code, node):
+    global huff_code_dict
+    if node.get_left_child() is not None:
+        gen_huff_codes(cur_code+'0', node.get_left_child())
+    if node.get_right_child() is not None:
+        gen_huff_codes(cur_code+'1', node.get_right_child())
+    else:
+        huff_code_dict[node.get_cont()] = cur_code
+
+gen_huff_codes('0b', heap[0])
 
 
 
+out = BitArray()
+for b in kek:
+    out.append(huff_code_dict[b])
 
-# out = BitArray()
-# for b in kek:
-    # out.append(f'uint:12={b}')
+split = FILE_NAME.split('.')
+OUT_FILE = split[0] + '.lz'
 
-# split = FILE_NAME.split('.')
-# OUT_FILE = split[0] + '.lz'
-
-# with open(OUT_FILE, 'wb') as f:
-    # out.tofile(f)
+with open(OUT_FILE, 'wb') as f:
+    out.tofile(f)
 
