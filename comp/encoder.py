@@ -1,8 +1,11 @@
+import sys
 from bitstring import BitArray, BitStream
 
 
 
 MAX_CODE_LEN = 4096
+FILE_NAME = sys.argv[1]
+
 
 # Gen dict
 dictionary = dict()
@@ -27,7 +30,7 @@ def LZW(b_array):
         out.append(dictionary[tmp_buff])
     return out
 
-infile = open("./testFile.tex", 'rb')
+infile = open(FILE_NAME, 'rb')
 file_bytes = bytearray(infile.read())
 infile.close()
 kek = LZW(file_bytes)
@@ -35,15 +38,9 @@ out = BitArray()
 for b in kek:
     out.append(f'uint:12={b}')
 
-with open('out.lz', 'wb') as f:
+split = FILE_NAME.split('.')
+OUT_FILE = split[0] + '.lz'
+
+with open(OUT_FILE, 'wb') as f:
     out.tofile(f)
 
-
-kek_bytes = None
-with open('out.lz', 'rb') as f:
-    kek_bytes = bytearray(f.read())
-
-print(len(kek_bytes))
-print(len(file_bytes))
-print(len(kek))
-print(kek[len(kek)-2])

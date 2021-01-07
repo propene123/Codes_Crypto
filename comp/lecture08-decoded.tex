@@ -1,0 +1,329 @@
+
+
+
+\section{Wavelet coding I: Mathematical background}
+\label{sec:08}
+
+
+\subsection{The Continuous Wavelet Transform}
+
+\paragraph{Mathematical definitions} 
+The continuous wavelet transform (\Define{CWT}) of a function $f(t)$ involves a \Important{mother wavelet} $\psi(t)$. The mother wavelet is scaled by a factor $a$ and translated by $b$ as such:
+\[
+    \psi_{a,b}(t) = \frac{1}{\sqrt{|a|}} \psi \left( \frac{t-b}{a} \right).
+\]
+We view the $\psi_{a,b}$ functions as a basis, and we naturally compute the inner product
+\[
+    W(a,b) := \langle f(t), \psi_{a,b}(t)  \rangle = \int_{-\infty}^\infty f(t) \psi^*_{a,b}(t) \ dt.
+\]
+The mother wavelet needs to satisfy three properties.
+\begin{enumerate}
+    \item It has zero average:
+    \[
+        \int_{-\infty}^\infty \psi(t) \ dt = 0.
+    \]
+    
+    \item It has finite energy:
+    \[
+        \int_{-\infty}^\infty |\psi(t)|^2 \ dt < \infty. 
+    \]
+    
+    \item The admissibility condition. Let
+    \begin{align*}
+        \Psi(\omega) &:= \int_{-\infty}^\infty \psi(t) \e^{-\i \omega t} \ dt,\\
+        C &:= \int_{-\infty}^\infty \frac{ |\Psi(\omega)^2| }{ |\omega| } \ d\omega.
+    \end{align*}
+    Then the admissibility condition requires that $0 < C < \infty$. This technical condition ensures that the inverse CWT exists. You needn't remember the details.
+\end{enumerate}
+
+\paragraph{Intuition}
+The CWT provides a \Important{time-frequency representation} of a signal. Let us consider the signal $f(t) = \sin (t)$ as a basic example. 
+
+Firstly, note that due to the finite energy condition, the mother wavelet amplitude decreases rapidly when $t$ tends to plus or minus infinity. A good example is the \Define{Mexican hat} wavelet:
+
+\begin{center}
+\includegraphics[width=10cm]{DataCompression/mexican.png}
+\end{center}
+
+The Mexican hat wavelet is similar to having one oscillation.
+
+
+For a fixed $a$, the set $\{ \psi_{a,b} : b \in \R \}$ is a sequence of the same function translated over time. If the Mexican hat is placed in phase with the sinusoid, then the inner product will be a large positive number; if it is in opposite phase it will be a large negative number. So it will create oscillations.
+
+On the other hand, for a fixed $b$, the set $\{ \psi_{a,b} : a \in \R \}$ is a sequence of the same function stretched and squeezed. For the Mexican hat, it means changing the frequency of its one oscillation. If the frequency matches that of the sinusoid, it will oscillate a lot. If the frequencies do not match, the oscillations will have a much lower amplitude.
+
+This yields the following time-frequency diagram.
+
+\begin{center}
+\includegraphics[width=10cm]{DataCompression/time-frequency.png}
+\end{center}
+
+\subsection{The Haar transform}
+
+Once again, we will be dealing with two-dimensional, discrete time signals. Let us consider the simplest wavelet in discrete form: the \Important{Haar transform}. It is based on the \Define{Haar wavelet}
+\[
+    \psi(t) = \begin{cases}
+    1 & \text{if } 0 \le t < 1/2,\\
+    -1 & \text{if } 1/2 \le t < 1,\\
+    0 & \text{otherwise.}
+    \end{cases}
+\]
+It also needs the \Important{scaling function}
+\[
+    \phi(t) = \begin{cases}
+    1 & \text{if } 0 \le t < 1,\\
+    0 & \text{otherwise}
+    \end{cases}
+\]
+to take the DC term into account.
+
+\begin{center}
+\includegraphics[width=10cm]{DataCompression/haar_wavelet.png}
+\end{center}
+
+
+Leaving out some details, here's how we can discretise this. Let $N = 2^n$, then the Haar matrix ${\bf H}_N$ is defined recursively as follows. Firstly,
+\[
+    {\bf H}_2 = \frac{1}{\sqrt{2}} \begin{pmatrix}
+    1 & 1\\
+    1 & -1
+    \end{pmatrix}.
+\]
+Then
+\[
+    {\bf H}_{2N} = \frac{1}{\sqrt{2}} \begin{pmatrix}
+    {\bf H}_N  \otimes (1,1)\\
+    {\bf I}_N \otimes (1,-1)
+    \end{pmatrix},
+\]
+where ${\bf I}_N$ is the identity matrix and $\otimes$ denotes the Kronecker product.
+
+Note: the Kronecker product of two matrices ${\bf A}$ and ${\bf B}$ is (informally) defined as follows. Say ${\bf A}$ is $m \times n$ and ${\bf B}$ is $r \times s$, then ${\bf K} = {\bf A} \otimes {\bf B}$ is an $mr \times ns$ matrix, where every entry $a_{i,j}$ of ${\bf A}$ has been replaced by the whole matrix $a_{i,j}{\bf B}$.
+
+For instance, we have
+\begin{align*}
+    {\bf H}_4 &= \frac{1}{\sqrt{2}} \begin{pmatrix}
+     \begin{pmatrix}
+    \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}}\\
+    \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}}
+    \end{pmatrix} \otimes (1,1)\\
+    \begin{pmatrix}
+    1 & 0\\
+    0 & 1
+    \end{pmatrix} \otimes (1, -1)
+    \end{pmatrix}\\
+    &= \frac{1}{\sqrt{2}} \begin{pmatrix}
+    \frac{1}{\sqrt{2}} \cdot (1,1) & \frac{1}{\sqrt{2}} \cdot (1,1)\\
+    \frac{1}{\sqrt{2}} \cdot (1,1) & -\frac{1}{\sqrt{2}} \cdot (1,1)\\
+    1 \cdot (1, -1) & 0 \cdot (1, -1)\\
+    0 \cdot (1, -1) & 1 \cdot (1, -1)
+    \end{pmatrix}\\
+    &= \frac{1}{ \sqrt{2} } \begin{pmatrix}
+    \frac{1}{\sqrt{2}}           & \frac{1}{\sqrt{2}}         & \frac{1}{\sqrt{2}}         & \frac{1}{\sqrt{2}}\\
+    \frac{1}{\sqrt{2}}           & \frac{1}{\sqrt{2}}         & -\frac{1}{\sqrt{2}}        & -\frac{1}{\sqrt{2}}\\
+    1    & -1 & 0         & 0\\
+    0           & 0         & 1  & -1
+    \end{pmatrix}.
+\end{align*}
+
+
+We then have
+\begin{align*}
+    {\bf H}_4 &= \frac{1}{ \sqrt{4} } \begin{pmatrix}
+    1           & 1         & 1         & 1\\
+    1           & 1         & -1        & -1\\
+    \sqrt{2}    & -\sqrt{2} & 0         & 0\\
+    0           & 0         & \sqrt{2}  & -\sqrt{2}
+    \end{pmatrix}\\
+    %
+    {\bf H}_8 &= \frac{1}{ \sqrt{8} } \begin{pmatrix}
+    1           & 1         & 1         & 1         & 1         & 1         & 1         & 1\\
+    1           & 1         & 1         & 1         & -1        & -1        & -1        & -1\\
+    \sqrt{2}    & \sqrt{2}  & -\sqrt{2} & -\sqrt{2} & 0         & 0         & 0         & 0\\
+    0           & 0         & 0         & 0         & \sqrt{2}  & \sqrt{2}  & -\sqrt{2} & -\sqrt{2}\\
+    2           & -2        & 0         & 0         & 0         & 0         & 0         &  0\\
+    0           & 0         & 2         & -2        & 0         & 0         & 0         &  0\\
+    0           & 0         & 0         & 0         & 2         & -2        & 0         &  0\\
+    0           & 0         & 0         & 0         & 0         & 0         & 2         &  -2
+    \end{pmatrix}.
+\end{align*} 
+(Yes, it is the same as for the DWHT for $N = 2$. But it's different for $N = 4$ and after that!)
+
+The Haar matrix can be decomposed into ``computing averages and differences'' as follows. For all $N$ powers of $2$, let
+\[
+    \Delta_N = \frac{1}{\sqrt{N}} \begin{pmatrix}
+    1 & 1 & 0 & 0 & \dots & 0 & 0\\ 
+    0 & 0 & 1 & 1 & \dots & 0 & 0\\
+    \vdots & \ddots & \dots & \dots & \dots & 1 & 1\\
+    1 & -1 & 0 & 0 & \dots & 0 & 0\\ 
+    0 & 0 & 1 & -1 & \dots & 0 & 0\\
+    \vdots & \ddots & \dots & \dots & \dots & 1 & -1
+    \end{pmatrix},
+\]
+so that
+\begin{align*}
+    \Delta_2 &= \frac{1}{\sqrt{2}} \begin{pmatrix}
+    1 & 1\\
+    1 & -1
+    \end{pmatrix},\\
+    \Delta_4 &= \frac{1}{\sqrt{4}} \begin{pmatrix}
+    1 & 1 & 0 & 0\\
+    0 & 0 & 1 & 1\\
+    1 & -1 & 0 & 0\\
+    0 & 0 & 1 & -1
+    \end{pmatrix},\\
+    \Delta_8 &= \frac{1}{\sqrt{8}} \begin{pmatrix}
+    1 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 1 & 1 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 1 & 1 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 1 & 1\\
+    1 & -1 & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 1 & -1 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 1 & -1 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 1 & -1
+    \end{pmatrix}.
+\end{align*}
+
+We can then decompose, e.g. ${\bf H}_8$ as follows:
+\begin{align*}
+    {\bf H}_8 &= \left(\begin{array}{c|c}
+    \Delta_2 & {\bf 0}\\
+    \hline
+    {\bf 0} & {\bf I}_6
+    \end{array} \right)
+    \left(\begin{array}{c|c}
+    \Delta_4 & {\bf 0}\\
+    \hline
+    {\bf 0} & {\bf I}_4
+    \end{array} \right)
+    \left(\begin{array}{c|c}
+    \multicolumn{2}{c}{\Delta_8}
+    \end{array} \right)\\
+    %
+    {\bf H}_8 &=
+        \left( \begin{array}{cc|cccccc}
+    c & c & 0 & 0 & 0 & 0 & 0 & 0\\
+    c & -c & 0 & 0 & 0 & 0 & 0 & 0\\
+    \hline
+    0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+    \end{array} \right)
+    \left( \begin{array}{cccc|cccc}
+    b & b & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & b & b & 0 & 0 & 0 & 0\\
+    b & -b & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & b & -b & 0 & 0 & 0 & 0\\
+    \hline
+    0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+    \end{array} \right)
+    \left( \begin{array}{cccccccc}
+    a & a & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & a & a & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & a & a & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & a & a\\
+    a & -a & 0 & 0 & 0 & 0 & 0 & 0\\
+    0 & 0 & a & -a & 0 & 0 & 0 & 0\\
+    0 & 0 & 0 & 0 & a & -a & 0 & 0\\
+    0 & 0 & 0 & 0 & 0 & 0 & a & -a
+    \end{array} \right),
+\end{align*}
+where $c = \frac{1}{\sqrt{2}}$, $b = \frac{1}{\sqrt{4}}$, and $a = \frac{1}{\sqrt{8}}$.
+
+This product should be read from right to left: ${\bf H}_8 = {\bf C}{\bf B}{\bf A}$. First, ${\bf A}$ computes the four averages of adjacent of points, and keeps their differences in order to remain reversible. Second, ${\bf B}$ does the same as ${\bf A}$, but only for the four averages (and leaves the differences untouched), thus creating two more differences. Finally, ${\bf C}$ computes the average of the remaining two averages, to get one final average and seven other differences.
+
+We associate with each iteration a quantity called \Define{resolution}, which is defined as the number of remaining averages at the end of the iteration. The resolutions after each of the three iterations above are $4(= 2^2)$, $2(= 2^1)$, and $1(= 2^0)$.
+
+We can think of the averages as a coarse resolution representation of
+the original image, and of the details as the data needed to reconstruct the original image from this coarse resolution. If the pixels of the image are correlated, the coarse representation will resemble the original pixels, while the details will be small.
+
+Here are the basis matrices of the Haar transform for $N = 8$.
+
+\begin{center}
+\includegraphics[width=10cm]{DataCompression/haar.png}
+\end{center}
+
+\paragraph{The Haar transform in 2D}
+The simplest way of applying the Haar transform in 2D is the standard image wavelet transform, where we simply apply the 1D-transform row-wise and then column-wise. That is, we do
+\[
+    \Theta = {\bf H} ({\bf X}{\bf H}^\top).
+\]
+
+Another, much more common, technique is the \Important{pyramid} image wavelet transform. The idea is to decompose the Haar matrix as a chain of ``averages and differences'' computations and alternate row and column operations. 
+
+\begin{center}
+\includegraphics[width=10cm]{DataCompression/pyramid.png}
+\end{center}
+
+
+Typically, the averages (that end up in the top left hand region) have large values, while the differences (in the three other regions) tend to have small values. Those regions are called \Define{subbands}. Subbands actually reflect different geometrical artifacts of the image:
+\begin{itemize}
+    \item  the upper-right subband (usually referred to as LH) corresponds to vertical artifacts;
+
+    \item the lower-left subband (usually referred to as HL) corresponds to horizontal artifacts;
+    
+    \item the lower-right subband (usually referred to as HH) corresponds to diagonal artifacts.
+\end{itemize}
+
+Below is a typical image decomposition using the pyramid decomposition.
+
+\begin{center}
+    \includegraphics[width=10cm]{DataCompression/Lenna_Haar.png}
+\end{center}
+
+%\subsection{Image decompositions}
+
+\subsection{See further}
+
+\paragraph{Filter banks}
+The most common way of implementing the Discrete Wavelet Transform (not just for Haar, but for any wavelet) is via the use of \Important{filter banks}. Here's a rapid explanation of the intuition. We can view ${\bf H}_2$ as using two filters:
+\[
+    {\bf H}_2 = \frac{1}{\sqrt{2}} \begin{pmatrix}
+    1 & 1\\
+    1 & -1
+    \end{pmatrix},
+\]
+the first row corresponds to a lowpass filter, that only takes the DC term (low frequency); the second row corresponds to a highpass filter, that only takes the high frequency term. In general, the ``averages and differences'' computation can be viewed as applying two simple filters on different parts of the data; those filters are then placed in series to compute the whole transform.
+
+\paragraph{Various image decompositions}
+Even though the pyramid image decomposition is by far the most common, many different image decompositions have been proposed, e.g. Laplacian pyramid, line, quincux, (adaptive) wavelet packet transform, full wavelet decomposition, etc.
+
+
+
+\paragraph{Other wavelets}
+We will see two other wavelets in the next lecture. But many other wavelets have been proposed: Meyer, Morlet, Shannon, the large family of Daubechies wavelets, that of Coifman, etc. Their definition can range from easy (e.g. Morlet) to highly involved (Daubechies). 
+
+
+
+\subsection{Exercises}
+
+\begin{exercise}
+What is the number of nonzero entries in ${\bf H}_N$?
+\end{exercise}
+
+\begin{exercise}
+What is the inverse of ${\bf H}_N$? Is that matrix orthogonal?
+\end{exercise}
+
+\begin{exercise}
+Compute the two-dimensional Haar transform of the ${\bf X}$ data from Lecture \ref{sec:07} using the pyramid decomposition.
+\end{exercise}
+
+
+
+
+
+
+
+
+
+
+
+
+

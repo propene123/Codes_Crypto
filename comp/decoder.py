@@ -1,6 +1,8 @@
+import sys
 from bitstring import BitArray, BitStream
 
 MAX_CODE_LEN = 4096
+FILE_NAME = sys.argv[1]
 
 # Gen dict
 dictionary = dict()
@@ -35,7 +37,7 @@ def LZW_decode(in_codes):
 
 
 
-infile = open('out.lz', 'rb')
+infile = open(FILE_NAME, 'rb')
 in_stream = BitStream(infile)
 infile.close()
 in_codes = []
@@ -45,12 +47,11 @@ for i in range(len(in_stream) // 12):
 
 kek = LZW_decode(in_codes)
 
-with open("decoded.tex", 'wb') as f:
+split = FILE_NAME.split('.')
+OUT_FILE = split[0] + '-decoded.tex'
+
+
+with open(OUT_FILE, 'wb') as f:
     for b in kek:
         f.write(b)
-
-
-
-
-
 
