@@ -51,13 +51,45 @@ infile = open(FILE_NAME, 'rb')
 file_bytes = bytearray(infile.read())
 infile.close()
 kek = LZW(file_bytes)
-out = BitArray()
-for b in kek:
-    out.append(f'uint:12={b}')
+prob_dict = dict()
+for c in kek:
+    if c in prob_dict:
+        prob_dict[c] += 1
+    else:
+        prob_dict[c] = 1
+for key, value in prob_dict.items():
+    prob_dict[key] = value/len(kek)
 
-split = FILE_NAME.split('.')
-OUT_FILE = split[0] + '.lz'
 
-with open(OUT_FILE, 'wb') as f:
-    out.tofile(f)
+
+class Node():
+    def __init__(self, cont, prob):
+        self.cont = None
+        self.left_child = None
+        self.right_child = None
+        self.prob = None
+
+    def set_right_child(self, child):
+        self.right_child = child
+
+    def set_left_child(self, child):
+        self.left_child = child
+
+
+
+
+
+
+
+
+
+# out = BitArray()
+# for b in kek:
+    # out.append(f'uint:12={b}')
+
+# split = FILE_NAME.split('.')
+# OUT_FILE = split[0] + '.lz'
+
+# with open(OUT_FILE, 'wb') as f:
+    # out.tofile(f)
 
