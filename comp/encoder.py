@@ -5,45 +5,73 @@ from functools import total_ordering
 
 
 
-MAX_CODE_LEN = 4096
+MAX_CODE_LEN = 65536
 FILE_NAME = sys.argv[1]
-
 
 # Gen dict
 dictionary = dict()
+def add_to_dict(phrase, code):
+    global dictionary
+    for i in range(1,len(phrase)+1):
+        dictionary[phrase[0:i].encode('utf-8')] = code
+        code += 1
+    return code
+
+
+
 def gen_dict():
     global dictionary
     dictionary = dict()
     for i in range(256):
         dictionary[bytes([i])] = i
-    dictionary['\\section'.encode('utf-8')] = 256
-    dictionary['\\label'.encode('utf-8')] = 257
-    dictionary['\\begin'.encode('utf-8')] = 258
-    dictionary['\\paragraph'.encode('utf-8')] = 259
-    dictionary['\\end'.encode('utf-8')] = 260
-    dictionary['\\subsection'.encode('utf-8')] = 261
-    dictionary['\\text'.encode('utf-8')] = 262
-    dictionary['\\frac'.encode('utf-8')] = 263
-    dictionary['\\item'.encode('utf-8')] = 264
-    dictionary['\\align'.encode('utf-8')] = 265
+    # 256 reserved for clear code
+    code = 257
+    code = add_to_dict('\\section', 257)
+    code = add_to_dict('\\label', code)
+    code = add_to_dict('\\begin', code)
+    code = add_to_dict('\\paragraph', code)
+    code = add_to_dict('\\end', code)
+    code = add_to_dict('\\subsection', code)
+    code = add_to_dict('\\text', code)
+    code = add_to_dict('\\frac', code)
+    code = add_to_dict('\\item', code)
+    code = add_to_dict('\\align', code)
+    code = add_to_dict('width', code)
+    code = add_to_dict('height', code)
+    code = add_to_dict('\\sqrt', code)
+    code = add_to_dict('\\includegraphics', code)
+    return code
+    
 
 
-gen_dict()
+
 
 
 def LZW(b_array):
-    start_code = 266
+    start_code = gen_dict()
     tmp_buff = b''
     out = []
+    old_c_ratio = 0
+    new_c_ratio = 0
+    c_threshold = 1
+    comp_len = 0
+    code_len = 0
     for b in b_array:
+        comp_len += 1
         b_str = bytes([b])
         if tmp_buff + b_str in dictionary:
             tmp_buff = tmp_buff + b_str
         else:
             out.append(dictionary[tmp_buff])
+            code_len += 16
             if start_code < MAX_CODE_LEN:
+                old_c_ratio = ((comp_len-1)*8)/(code_len)
                 dictionary[tmp_buff + b_str] = start_code
                 start_code += 1
+            if start_code == MAX_CODE_LEN:
+                new_c_ratio = ((comp_len-1)*8)/(code_len)
+                if (old_c_ratio/new_c_ratio) > c_threshold:
+                    start_code = gen_dict()
             tmp_buff = b_str
     if tmp_buff in dictionary:
         out.append(dictionary[tmp_buff])
@@ -136,4 +164,6 @@ OUT_FILE = split[0] + '.lz'
 
 with open(OUT_FILE, 'wb') as f:
     out.tofile(f)
+
+
 
