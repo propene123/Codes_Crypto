@@ -9,7 +9,7 @@ table = dict()
 in_bytes = None
 with open(sys.argv[1], 'rb') as f:
     in_bytes = bytearray(f.read())
-in_stream = BitStream(in_bytes)
+in_stream = BitStream(in_bytes) 
 symbol_total = len(in_bytes)
 symbol_dict = dict()
 
@@ -66,9 +66,12 @@ for i in range(0, symbol_total-1):
         high_int = (high_int % 10**8) * 10
         high_int += 9
         low_int = (low_int % 10**8) * 10
-        high = high_int / (10**9)
+        high = (high_int+1) / (10**9)
         low = low_int / (10**9)
-    print(f'high={high_int} || low={low_int}')
 
+
+
+print(out)
+print(low_int)
 
 
