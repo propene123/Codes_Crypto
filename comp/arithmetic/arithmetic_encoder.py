@@ -59,6 +59,16 @@ for i in range(0, symbol_total-1):
     low = low + diff * float(table[in_char][1])
     high_int = int(high * (10**9)) -1
     low_int = int(low * (10**9))
+    high_str = str(high_int)
+    low_str = str(low_int)
+    if high_str[0] == low_str[0]:
+        out.append(high_int // 10**8)
+        high_int = (high_int % 10**8) * 10
+        high_int += 9
+        low_int = (low_int % 10**8) * 10
+        high = high_int / (10**9)
+        low = low_int / (10**9)
+    print(f'high={high_int} || low={low_int}')
 
-print(high_int)
-print(low_int)
+
+
