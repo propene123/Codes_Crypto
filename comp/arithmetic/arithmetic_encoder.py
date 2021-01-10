@@ -21,10 +21,9 @@ for i in range(0, symbol_total):
         symbol_dict[symbol] += 1
 
 
-cum_freq_total = symbol_total - 1
+cum_freq_total = symbol_total
 for sym, freq in symbol_dict.items():
-    if sym != 10:
-        table[sym] = [freq, 0.0, 0.0, 0]
+    table[sym] = [freq, 0.0, 0.0, 0]
 
 table_keys = list(table.keys())
 init_key = table_keys[0]
@@ -41,10 +40,6 @@ for i in range(1, len(table_keys)):
     table[key][3] = table[prev_key][3] - table[key][0]
 
 
-
-
-print(table)
-
 in_stream.pos = 0
 low_int = 000000000
 high_int = 999999999
@@ -52,7 +47,7 @@ low = 0.0
 high = 1.0
 out = []
 
-for i in range(0, symbol_total-1):
+for i in range(0, symbol_total):
     in_char = in_stream.read('uint:8')
     diff = high - low
     high = low + diff * float(table[in_char][2])
