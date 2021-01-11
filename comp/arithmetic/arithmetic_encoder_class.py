@@ -5,7 +5,7 @@ class ArithmeticEncoder():
     def __init__(self, symbol_size, symbol_num, init_dict):
         self.table = init_dict
         self.symbol_size = symbol_size
-        self.symbol_num = symbol_num+1
+        self.symbol_num = symbol_num +1
         getcontext().prec = 999
 
     def gen_dict_from_file(self, in_stream):
@@ -33,6 +33,8 @@ class ArithmeticEncoder():
             self.table[key][2] = self.table[prev_key][1]
             self.table[key][1] = Decimal(self.table[key][2] - prob)
             self.table[key][3] = self.table[prev_key][3] - self.table[key][0]
+        self.table[table_keys[len(table_keys)-1]][1] = Decimal(0)
+        print(self.table)
 
 
     def enc_char(self, char, low, high, low_int, high_int, out):
@@ -61,8 +63,8 @@ class ArithmeticEncoder():
         out = []
         for i in range(0, self.symbol_num-1):
             in_char = in_stream.read(f'uint:{self.symbol_size}')
-            self.enc_char(in_char, low, high, low_int, high_int, out)
-        self.enc_char('eof', low, high, low_int, high_int, out)
+            low, high, low_int, high_int = self.enc_char(in_char, low, high, low_int, high_int, out)
+        low, high, low_int, high_int = self.enc_char('eof', low, high, low_int, high_int, out)
         out_bytes = BitArray()
         block_idx = 0
         tmp_out = ''
@@ -73,6 +75,9 @@ class ArithmeticEncoder():
                 out_bytes.append(f'uint:32={int(tmp_out)}')
                 block_idx = 0
                 tmp_out = ''
-        out_bytes.append(f'uint:32={int(tmp_out)}')
+        if tmp_out != '':
+            out_bytes.append(f'uint:32={int(tmp_out)}')
         out_bytes.append(f'uint:32={low_int}')
+        print(out)
+        print(low_int)
         return out_bytes
