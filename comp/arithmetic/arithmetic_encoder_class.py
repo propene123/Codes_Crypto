@@ -5,17 +5,18 @@ class ArithmeticEncoder():
     def __init__(self, symbol_size, symbol_num, init_dict):
         self.table = init_dict
         self.symbol_size = symbol_size
-        self.symbol_num = symbol_num
+        self.symbol_num = symbol_num+1
         getcontext().prec = 999
 
     def gen_dict_from_file(self, in_stream):
         symbol_dict = dict()
-        for i in range(0, self.symbol_num):
+        for i in range(0, self.symbol_num-1):
             symbol = in_stream.read(f'uint:{self.symbol_size}')
             if symbol not in symbol_dict:
                 symbol_dict[symbol] = 1
             else:
                 symbol_dict[symbol] += 1
+        self.table['eof'] = [1,0.0,0.0,0]
         for sym, freq in symbol_dict.items():
             self.table[sym] = [freq, 0.0, 0.0, 0]
 
@@ -33,17 +34,11 @@ class ArithmeticEncoder():
             self.table[key][1] = Decimal(self.table[key][2] - prob)
             self.table[key][3] = self.table[prev_key][3] - self.table[key][0]
 
-    def encode(self, in_stream):
-        low_int = 000000000
-        high_int = 999999999
-        low = 0.0
-        high = 1.0
-        out = []
-        for i in range(0, self.symbol_num):
-            in_char = in_stream.read(f'uint:{self.symbol_size}')
+
+    def enc_char(self, char, low, high, low_int, high_int, out):
             diff = high - low
-            high = low + diff * float(self.table[in_char][2])
-            low = low + diff * float(self.table[in_char][1])
+            high = low + diff * float(self.table[char][2])
+            low = low + diff * float(self.table[char][1])
             high_int = int(high * (10**9)) -1
             low_int = int(low * (10**9))
             high_str = str(high_int)
@@ -55,6 +50,19 @@ class ArithmeticEncoder():
                 low_int = (low_int % 10**8) * 10
                 high = (high_int+1) / (10**9)
                 low = low_int / (10**9)
+            return low, high, low_int, high_int
+
+
+    def encode(self, in_stream):
+        low_int = 000000000
+        high_int = 999999999
+        low = 0.0
+        high = 1.0
+        out = []
+        for i in range(0, self.symbol_num-1):
+            in_char = in_stream.read(f'uint:{self.symbol_size}')
+            self.enc_char(in_char, low, high, low_int, high_int, out)
+        self.enc_char('eof', low, high, low_int, high_int, out)
         out_bytes = BitArray()
         block_idx = 0
         tmp_out = ''
