@@ -39,6 +39,7 @@ class ArithmeticEncoder():
 
     def enc_char(self, char, low, high, low_int, high_int, out):
             diff = high - low
+            print(f'low={low} || high={high}')
             high = low + diff * float(self.table[char][2])
             low = low + diff * float(self.table[char][1])
             high_int = int(high * (10**9)) -1

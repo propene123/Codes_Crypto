@@ -16,18 +16,22 @@ class ArithmeticDecoder():
         high = 999999999
         keys = list(self.table.keys())
         code = in_stream.read('uint:32')
-        index = ((code - low+0)*self.symbol_num-1)/(high-low+1)
+        code = 689279999
+        index = ((code - low+1)*self.symbol_num-1)/(high-low+1)
         index = int(index)
         cur_char = None
         # while cur_char != 'eof':
-        upper_key = keys[0]
-        lower_key = keys[len(keys)-1]
+        upper_key = keys[3]
+        lower_key = keys[0]
         for key in keys:
-            current = self.table[key]
-            if current[3] > index and current[3] < self.table[upper_key][3]:
-                upper_key = key
-            if current[3] < index and current[3] > self.table[lower_key][3]:
-                lower_key = key
+            current = self.table[key][3]
+            if current > index:
+                if self.table[upper_key][3] < index or current < self.table[upper_key][3]:
+                    upper_key = key
+            if current <= index:
+                if self.table[lower_key][3] > index or current > self.table[lower_key][3]:
+                    lower_key = key
+
         out_stream.append(f'uint:8={self.table[lower_key][0]}')
 
 

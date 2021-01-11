@@ -20,5 +20,5 @@ with open('out.lz', 'wb') as f:
 with open('out.lz', 'rb') as f:
     in_bytes = bytearray(f.read())
     kek_stream = BitStream(in_bytes)
-    decoder = ArithmeticDecoder(8, len(in_bytes), encoder.table)
+    decoder = ArithmeticDecoder(8, kek+1, encoder.table)
     decoder.decode(kek_stream)
