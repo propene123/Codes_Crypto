@@ -25,15 +25,16 @@ class ArithmeticEncoder():
 
         self.table[init_key][3] = self.symbol_num - self.table[init_key][0]
         self.table[init_key][2] = Decimal(1.0)
-        self.table[init_key][1] = Decimal(self.table[init_key][2] - Decimal(self.table[init_key][0] / self.symbol_num))
+        self.table[init_key][1] = Decimal(Decimal(self.table[init_key][2]) - Decimal(Decimal(self.table[init_key][0]) / Decimal(self.symbol_num)))
         for i in range(1, len(table_keys)):
             key = table_keys[i]
             prev_key = table_keys[i-1]
             prob  = Decimal(Decimal(self.table[key][0]) / Decimal(self.symbol_num))
             self.table[key][2] = self.table[prev_key][1]
-            self.table[key][1] = Decimal(self.table[key][2] - prob)
+            self.table[key][1] = Decimal(Decimal(self.table[key][2]) - prob)
             self.table[key][3] = self.table[prev_key][3] - self.table[key][0]
         self.table[table_keys[len(table_keys)-1]][1] = Decimal(0)
+        print(self.table)
 
 
     def enc_char(self, char, low, high, low_int, high_int, out):
