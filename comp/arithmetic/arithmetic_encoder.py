@@ -65,8 +65,19 @@ for i in range(0, symbol_total):
         low = low_int / (10**9)
 
 
+out_bytes = BitArray()
+block_idx = 0
+tmp_out = ''
+for i in range(len(out)):
+    tmp_out += str(out[i])
+    block_idx+=1
+    if block_idx==9:
+        out_bytes.append(f'uint:32={int(tmp_out)}')
+        block_idx = 0
+        tmp = ''
 
-print(out)
-print(low_int)
+out_bytes.append(f'uint:32={int(tmp_out)}')
+out_bytes.append(f'uint:32={low_int}')
 
-
+with open('out.lz', 'wb') as f:
+    out_bytes.tofile(f)
