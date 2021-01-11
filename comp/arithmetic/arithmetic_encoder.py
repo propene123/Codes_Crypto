@@ -74,10 +74,9 @@ for i in range(len(out)):
     if block_idx==9:
         out_bytes.append(f'uint:32={int(tmp_out)}')
         block_idx = 0
-        tmp = ''
+        tmp_out = ''
 
 out_bytes.append(f'uint:32={int(tmp_out)}')
 out_bytes.append(f'uint:32={low_int}')
-
 with open('out.lz', 'wb') as f:
     out_bytes.tofile(f)
