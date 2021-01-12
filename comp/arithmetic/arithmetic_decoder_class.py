@@ -42,10 +42,11 @@ class ArithmeticDecoder():
                     if self.table[lower_key][3] > index or current > self.table[lower_key][3]:
                         lower_key = key
             cur_char = lower_key
+            print(chr(cur_char))
             out_stream.append(f'uint:8={cur_char}')
             diff = high-low
-            high = low + ((diff+1)*self.table[upper_key][3])//10 -1
-            low = low + ((diff+1)*self.table[lower_key][3])//10
+            high = low + ((diff+1)*self.table[upper_key][3])//self.symbol_num -1
+            low = low + ((diff+1)*self.table[lower_key][3])//self.symbol_num
             high_str = str(high)
             low_str = str(low)
             if high_str[0] == low_str[0]:
