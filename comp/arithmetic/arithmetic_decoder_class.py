@@ -27,8 +27,10 @@ class ArithmeticDecoder():
         code = int(code)
         cur_char = None
         while cur_char != 'eof':
+            print(f'code={code}')
             index = ((code - low+1)*self.symbol_num-1)/(high-low+1)
             index = int(index)
+            print(f'index={index}')
             upper_key = keys[3]
             lower_key = keys[0]
             for key in keys:
@@ -47,11 +49,18 @@ class ArithmeticDecoder():
             high_str = str(high)
             low_str = str(low)
             if high_str[0] == low_str[0]:
+                print(f'old high={high}')
+                print(f'old low={low}')
+                print(f'old code={code}')
                 high = (high % 10**8) * 10
                 high += 9
                 low = (low % 10**8) * 10
                 code = (code % 10**8) * 10
                 code += block_array.pop(0)
+                print(f'new high={high}')
+                print(f'new low={low}')
+                print(f'in stream={block_array}')
+                print(f'new code={code}')
 
 
 

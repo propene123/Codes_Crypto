@@ -34,12 +34,10 @@ class ArithmeticEncoder():
             self.table[key][1] = Decimal(Decimal(self.table[key][2]) - prob)
             self.table[key][3] = self.table[prev_key][3] - self.table[key][0]
         self.table[table_keys[len(table_keys)-1]][1] = Decimal(0)
-        print(self.table)
 
 
     def enc_char(self, char, low, high, low_int, high_int, out):
             diff = high - low
-            print(f'low={low} || high={high}')
             high = low + diff * float(self.table[char][2])
             low = low + diff * float(self.table[char][1])
             high_int = int(high * (10**9)) -1
