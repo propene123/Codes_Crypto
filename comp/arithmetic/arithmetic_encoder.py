@@ -17,8 +17,13 @@ out_bytes = encoder.encode(in_stream)
 with open('out.lz', 'wb') as f:
     out_bytes.tofile(f)
 
+out_bytes = None
 with open('out.lz', 'rb') as f:
     in_bytes = bytearray(f.read())
     kek_stream = BitStream(in_bytes)
     decoder = ArithmeticDecoder(8, kek+1, encoder.table)
-    decoder.decode(kek_stream)
+    out_bytes = decoder.decode(kek_stream)
+
+
+with open('decoded.txt', 'wb') as f:
+    out_bytes.tofile(f)

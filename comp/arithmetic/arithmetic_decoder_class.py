@@ -15,7 +15,7 @@ class ArithmeticDecoder():
         low = 000000000
         high = 999999999
         keys = list(self.table.keys())
-        blocks = len(in_stream)//32
+        blocks = len(in_stream)//32 -1
         block_array = []
         for i in range(blocks):
             block = in_stream.read('uint:32')
@@ -27,11 +27,7 @@ class ArithmeticDecoder():
         code = int(code)
         cur_char = None
         while cur_char != 'eof':
-            print(f'code={code}')
             index = ((code - low+1)*self.symbol_num-1)/(high-low+1)
-            print(f'low={low}')
-            print(f'high={high}')
-            print(f'index={index}')
             index = int(index)
             upper_key = keys[3]
             lower_key = keys[0]
@@ -44,38 +40,20 @@ class ArithmeticDecoder():
                     if self.table[lower_key][3] > index or current > self.table[lower_key][3]:
                         lower_key = key
             cur_char = lower_key
-            print(chr(cur_char))
+            if cur_char == 'eof':
+                break
             out_stream.append(f'uint:8={cur_char}')
             diff = high-low
             high = low + ((diff+1)*self.table[upper_key][3])//self.symbol_num -1
-            print(f'upper key={self.table[upper_key][3]}')
             low = low + ((diff+1)*self.table[lower_key][3])//self.symbol_num
             high_str = str(high)
             low_str = str(low)
             if high_str[0] == low_str[0]:
-                # print(f'old high={high}')
-                # print(f'old low={low}')
-                # print(f'old code={code}')
                 high = (high % 10**8) * 10
                 high += 9
                 low = (low % 10**8) * 10
                 code = (code % 10**8) * 10
-                print(block_array)
                 code += block_array.pop(0)
-                print(f'HERE={code}')
-                # print(f'new high={high}')
-                # print(f'new low={low}')
-                # print(f'in stream={block_array}')
-                # print(f'new code={code}')
+        return out_stream
 
 
-
-
-
-# in_bytes = bytearray()
-# with open('out.lz', 'rb') as f:
-    # in_bytes = bytearray(f.read())
-
-# in_stream = BitStream(in_bytes)
-# decoder = ArithmeticDecoder(8, dict())
-# decoder.decode(in_stream)

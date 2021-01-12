@@ -37,9 +37,9 @@ class ArithmeticEncoder():
 
 
     def enc_char(self, char, low, high, low_int, high_int, out):
-            diff = high - low
-            high = low + diff * float(self.table[char][2])
-            low = low + diff * float(self.table[char][1])
+            diff = Decimal(high) - Decimal(low)
+            high = Decimal(low) + Decimal(diff) * Decimal(self.table[char][2])
+            low = Decimal(low) + Decimal(diff) * Decimal(self.table[char][1])
             high_int = int(high * (10**9)) -1
             low_int = int(low * (10**9))
             high_str = str(high_int)
@@ -49,20 +49,22 @@ class ArithmeticEncoder():
                 high_int = (high_int % 10**8) * 10
                 high_int += 9
                 low_int = (low_int % 10**8) * 10
-                high = (high_int+1) / (10**9)
-                low = low_int / (10**9)
+                high = Decimal(Decimal(high_int+1) / Decimal(10**9))
+                low = Decimal(Decimal(low_int) / Decimal(10**9))
             return low, high, low_int, high_int
 
 
     def encode(self, in_stream):
         low_int = 000000000
         high_int = 999999999
-        low = 0.0
-        high = 1.0
+        low = Decimal(0.0)
+        high = Decimal(1.0)
         out = []
         for i in range(0, self.symbol_num-1):
             in_char = in_stream.read(f'uint:{self.symbol_size}')
             low, high, low_int, high_int = self.enc_char(in_char, low, high, low_int, high_int, out)
+            print(f'low={low_int}')
+            print(f'high={high_int}')
         low, high, low_int, high_int = self.enc_char('eof', low, high, low_int, high_int, out)
         out_bytes = BitArray()
         block_idx = 0
