@@ -25,10 +25,10 @@ class ArithmeticDecoder():
         for i in range(9):
             code += str(block_array.pop(0))
         code = int(code)
-        index = ((code - low+1)*self.symbol_num-1)/(high-low+1)
-        index = int(index)
         cur_char = None
         while cur_char != 'eof':
+            index = ((code - low+1)*self.symbol_num-1)/(high-low+1)
+            index = int(index)
             upper_key = keys[3]
             lower_key = keys[0]
             for key in keys:
@@ -41,6 +41,18 @@ class ArithmeticDecoder():
                         lower_key = key
             cur_char = lower_key
             out_stream.append(f'uint:8={cur_char}')
+            diff = high-low
+            high = low + ((diff+1)*self.table[upper_key][3])//10 -1
+            low = low + ((diff+1)*self.table[lower_key][3])//10
+            high_str = str(high)
+            low_str = str(low)
+            if high_str[0] == low_str[0]:
+                high = (high % 10**8) * 10
+                high += 9
+                low = (low % 10**8) * 10
+                code = (code % 10**8) * 10
+                code += block_array.pop(0)
+
 
 
 
