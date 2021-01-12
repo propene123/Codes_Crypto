@@ -15,24 +15,32 @@ class ArithmeticDecoder():
         low = 000000000
         high = 999999999
         keys = list(self.table.keys())
-        code = in_stream.read('uint:32')
-        code = 689279999
+        blocks = len(in_stream)//32
+        block_array = []
+        for i in range(blocks):
+            block = in_stream.read('uint:32')
+            for c in str(block):
+                block_array.append(int(c))
+        code = ''
+        for i in range(9):
+            code += str(block_array.pop(0))
+        code = int(code)
         index = ((code - low+1)*self.symbol_num-1)/(high-low+1)
         index = int(index)
         cur_char = None
-        # while cur_char != 'eof':
-        upper_key = keys[3]
-        lower_key = keys[0]
-        for key in keys:
-            current = self.table[key][3]
-            if current > index:
-                if self.table[upper_key][3] < index or current < self.table[upper_key][3]:
-                    upper_key = key
-            if current <= index:
-                if self.table[lower_key][3] > index or current > self.table[lower_key][3]:
-                    lower_key = key
-
-        out_stream.append(f'uint:8={self.table[lower_key][0]}')
+        while cur_char != 'eof':
+            upper_key = keys[3]
+            lower_key = keys[0]
+            for key in keys:
+                current = self.table[key][3]
+                if current > index:
+                    if self.table[upper_key][3] < index or current < self.table[upper_key][3]:
+                        upper_key = key
+                if current <= index:
+                    if self.table[lower_key][3] > index or current > self.table[lower_key][3]:
+                        lower_key = key
+            cur_char = lower_key
+            out_stream.append(f'uint:8={cur_char}')
 
 
 
