@@ -56,7 +56,6 @@ def LZW(b_array):
     c_threshold = 1
     comp_len = 0
     code_len = 0
-    prev_match = b''
     for b in b_array:
         comp_len += 1
         b_str = bytes([b])
@@ -69,18 +68,12 @@ def LZW(b_array):
             code_len += 16
             if start_code < MAX_CODE_LEN:
                 old_c_ratio = ((comp_len-1)*8)/(code_len)
-                for i in range(len(tmp_buff+b_str)):
-                    new_str = prev_match + (tmp_buff+b_str)[0:i]
-                    dictionary[new_str] = start_code
-                    start_code += 1
-
-            # dictionary[tmp_buff + b_str] = start_code
-            # start_code += 1
+                dictionary[tmp_buff + b_str] = start_code
+                start_code += 1
             if start_code == MAX_CODE_LEN:
                 new_c_ratio = ((comp_len-1)*8)/(code_len)
                 if (old_c_ratio/new_c_ratio) > c_threshold:
                     start_code = gen_dict()
-            prev_match = tmp_buff + b_str
             tmp_buff = b_str
     if tmp_buff in dictionary:
         out.append(dictionary[tmp_buff])

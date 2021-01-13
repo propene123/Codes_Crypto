@@ -6,28 +6,43 @@ FILE_NAME = sys.argv[1]
 
 # Gen dict
 dictionary = dict()
+
+
+def add_to_dict(code, phrase):
+    global dictionary
+    for i in range(1, len(phrase)+1):
+        dictionary[code] = phrase[0:i].encode('utf-8')
+        code += 1
+    return code
+
+
 def gen_dict():
     global dictionary
     dictionary = dict()
     for i in range(256):
         dictionary[i] = bytes([i])
-    dictionary[256] = '\\section'.encode('utf-8')
-    dictionary[257] = '\\label'.encode('utf-8')
-    dictionary[258] = '\\begin'.encode('utf-8')
-    dictionary[259] = '\\paragraph'.encode('utf-8')
-    dictionary[260] = '\\end'.encode('utf-8')
-    dictionary[261] = '\\subsection'.encode('utf-8')
-    dictionary[262] = '\\text'.encode('utf-8')
-    dictionary[263] = '\\frac'.encode('utf-8')
-    dictionary[264] = '\\item'.encode('utf-8')
-    dictionary[265] = '\\align'.encode('utf-8')
+    code = 257
+    code = add_to_dict(257, '\\section')
+    code = add_to_dict(code, '\\label')
+    code = add_to_dict(code, '\\begin')
+    code = add_to_dict(code, '\\paragraph')
+    code = add_to_dict(code, '\\end')
+    code = add_to_dict(code, '\\subsection')
+    code = add_to_dict(code, '\\text')
+    code = add_to_dict(code, '\\frac')
+    code = add_to_dict(code, '\\item')
+    code = add_to_dict(code, '\\align')
+    code = add_to_dict(code, 'width')
+    code = add_to_dict(code, 'height')
+    code = add_to_dict(code, '\\sqrt')
+    code = add_to_dict(code, '\\includegraphics')
+    return code
 
 
-gen_dict()
 
 
 def LZW_decode(in_codes):
-    new_key = 266
+    new_key = gen_dict()
     prev_code = in_codes[0]
     cur_char = dictionary[prev_code]
     out = []
@@ -58,8 +73,8 @@ infile = open(FILE_NAME, 'rb')
 in_stream = BitStream(infile)
 infile.close()
 in_codes = []
-for i in range(len(in_stream) // 12):
-    in_codes.append(in_stream.read('uint:12'))
+for i in range(len(in_stream) // 16):
+    in_codes.append(in_stream.read('uint:16'))
 
 
 kek = LZW_decode(in_codes)
