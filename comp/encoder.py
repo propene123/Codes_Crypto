@@ -49,8 +49,9 @@ def gen_dict():
 
 def LZW(b_array):
     start_code = gen_dict()
+    symbol_width = 16
     tmp_buff = b''
-    out = []
+    out = BitArray()
     old_c_ratio = 0
     new_c_ratio = 0
     c_threshold = 1
@@ -64,7 +65,7 @@ def LZW(b_array):
             tmp_buff = tmp_buff + b_str
         else:
             # output dict match
-            out.append(dictionary[tmp_buff])
+            out.append(f'uint:{symbol_width}={dictionary[tmp_buff]}')
             code_len += 16
             if start_code < MAX_CODE_LEN:
                 old_c_ratio = ((comp_len-1)*8)/(code_len)
@@ -76,7 +77,7 @@ def LZW(b_array):
                     start_code = gen_dict()
             tmp_buff = b_str
     if tmp_buff in dictionary:
-        out.append(dictionary[tmp_buff])
+        out.append(f'uint:{symbol_width}={dictionary[tmp_buff]}')
     return out
 
 infile = open(FILE_NAME, 'rb')
@@ -158,14 +159,14 @@ kek = LZW(file_bytes)
 
 
 out = BitArray()
-for b in kek:
-    out.append(f'uint:16={b}')
+# for b in kek:
+    # out.append(f'uint:16={b}')
 
 split = FILE_NAME.split('.')
 OUT_FILE = split[0] + '.lz'
 
 with open(OUT_FILE, 'wb') as f:
-    out.tofile(f)
+    kek.tofile(f)
 
 new_bytes = bytearray()
 with open(OUT_FILE, 'rb') as f:

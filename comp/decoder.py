@@ -43,14 +43,17 @@ def gen_dict():
 
 def LZW_decode(in_codes):
     new_key = gen_dict()
-    prev_code = in_codes[0]
+    symbol_width = 16
+    prev_code = in_codes.read(f'uint:{symbol_width}')
     cur_char = dictionary[prev_code]
     out = []
     buff = b''
     prev_match = cur_char
     out.append(cur_char)
-    for i in range(1, len(in_codes)):
-        cur_code = in_codes[i]
+    i = 1
+    # for i in range(1, len(in_codes)):
+    while in_codes.pos != in_codes.len:
+        cur_code = in_codes.read(f'uint:{symbol_width}')
         if cur_code not in dictionary:
             buff = dictionary[prev_code]
             buff += cur_char
@@ -72,12 +75,12 @@ def LZW_decode(in_codes):
 infile = open(FILE_NAME, 'rb')
 in_stream = BitStream(infile)
 infile.close()
-in_codes = []
-for i in range(len(in_stream) // 16):
-    in_codes.append(in_stream.read('uint:16'))
+# in_codes = []
+# for i in range(len(in_stream) // 16):
+    # in_codes.append(in_stream.read('uint:16'))
 
 
-kek = LZW_decode(in_codes)
+kek = LZW_decode(in_stream)
 
 split = FILE_NAME.split('.')
 OUT_FILE = split[0] + '-decoded.tex'
