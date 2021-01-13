@@ -67,6 +67,7 @@ def LZW_decode(in_codes):
             dictionary[new_key] = tmp
             new_key += 1
         prev_code = cur_code
+    print(symbol_width)
     return out
 
 
