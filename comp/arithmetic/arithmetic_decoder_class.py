@@ -15,7 +15,7 @@ class ArithmeticDecoder():
         low = 000000000
         high = 999999999
         keys = list(self.table.keys())
-        blocks = len(in_stream)//32 -1
+        blocks = len(in_stream)//32
         block_array = []
         for i in range(blocks):
             block = in_stream.read('uint:32')

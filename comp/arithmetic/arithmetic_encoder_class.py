@@ -6,6 +6,9 @@ class ArithmeticEncoder():
         self.table = init_dict
         self.symbol_size = symbol_size
         self.symbol_num = symbol_num +1
+        self.count = 0
+        self.upper_dig = '0'
+        self.lower_dig = '0'
         getcontext().prec = 999
 
     def gen_dict_from_file(self, in_stream):
@@ -34,6 +37,7 @@ class ArithmeticEncoder():
             self.table[key][1] = Decimal(Decimal(self.table[key][2]) - prob)
             self.table[key][3] = self.table[prev_key][3] - self.table[key][0]
         self.table[table_keys[len(table_keys)-1]][1] = Decimal(0)
+        print(self.table)
 
 
     def enc_char(self, char, low, high, low_int, high_int, out):
@@ -46,11 +50,33 @@ class ArithmeticEncoder():
             low_str = str(low_int)
             if high_str[0] == low_str[0]:
                 out.append(high_int // 10**8)
+                if high_str[0] == self.upper_dig:
+                    for i in range(self.count):
+                        out.append(9)
+                else:
+                    for i in range(self.count):
+                        out.append(0)
+                self.count = 0
                 high_int = (high_int % 10**8) * 10
                 high_int += 9
                 low_int = (low_int % 10**8) * 10
                 high = Decimal(Decimal(high_int+1) / Decimal(10**9))
                 low = Decimal(Decimal(low_int) / Decimal(10**9))
+            if high_int - low_int <= 10000000:
+                print('MEHHHHHH')
+                self.count += 1
+                high_int_base = (high_int // 10**8)*(10**8)
+                high_int_pad = (high_int % (10**7))*10
+                high_int_base += high_int_pad
+                high_int_base += 9
+                high_int = high_int_base
+                low_int_base = (low_int // 10**8)*(10**8)
+                low_int_pad = (low_int % (10**7))*10
+                low_int_base += low_int_pad
+                low_int_base += 0
+                low_int = low_int_base
+                self.upper_dig = high_str[0]
+                self.lower_dig = low_str[0]
             return low, high, low_int, high_int
 
 
@@ -63,8 +89,6 @@ class ArithmeticEncoder():
         for i in range(0, self.symbol_num-1):
             in_char = in_stream.read(f'uint:{self.symbol_size}')
             low, high, low_int, high_int = self.enc_char(in_char, low, high, low_int, high_int, out)
-            print(f'low={low_int}')
-            print(f'high={high_int}')
         low, high, low_int, high_int = self.enc_char('eof', low, high, low_int, high_int, out)
         out_bytes = BitArray()
         block_idx = 0
