@@ -56,22 +56,31 @@ def LZW(b_array):
     c_threshold = 1
     comp_len = 0
     code_len = 0
+    prev_match = b''
     for b in b_array:
         comp_len += 1
         b_str = bytes([b])
         if tmp_buff + b_str in dictionary:
+            # extend input
             tmp_buff = tmp_buff + b_str
         else:
+            # output dict match
             out.append(dictionary[tmp_buff])
             code_len += 16
             if start_code < MAX_CODE_LEN:
                 old_c_ratio = ((comp_len-1)*8)/(code_len)
-                dictionary[tmp_buff + b_str] = start_code
-                start_code += 1
+                for i in range(len(tmp_buff+b_str)):
+                    new_str = prev_match + (tmp_buff+b_str)[0:i]
+                    dictionary[new_str] = start_code
+                    start_code += 1
+
+            # dictionary[tmp_buff + b_str] = start_code
+            # start_code += 1
             if start_code == MAX_CODE_LEN:
                 new_c_ratio = ((comp_len-1)*8)/(code_len)
                 if (old_c_ratio/new_c_ratio) > c_threshold:
                     start_code = gen_dict()
+            prev_match = tmp_buff + b_str
             tmp_buff = b_str
     if tmp_buff in dictionary:
         out.append(dictionary[tmp_buff])
@@ -81,83 +90,83 @@ infile = open(FILE_NAME, 'rb')
 file_bytes = bytearray(infile.read())
 infile.close()
 kek = LZW(file_bytes)
-prob_dict = dict()
-for c in kek:
-    if c in prob_dict:
-        prob_dict[c] += 1
-    else:
-        prob_dict[c] = 1
-for key, value in prob_dict.items():
-    prob_dict[key] = value/len(kek)
+# prob_dict = dict()
+# for c in kek:
+    # if c in prob_dict:
+        # prob_dict[c] += 1
+    # else:
+        # prob_dict[c] = 1
+# for key, value in prob_dict.items():
+    # prob_dict[key] = value/len(kek)
 
 
 
-@total_ordering
-class Node():
-    def __init__(self, prob, cont=None):
-        self.cont = cont
-        self.left_child = None
-        self.right_child = None
-        self.prob = prob
+# @total_ordering
+# class Node():
+    # def __init__(self, prob, cont=None):
+        # self.cont = cont
+        # self.left_child = None
+        # self.right_child = None
+        # self.prob = prob
 
-    def __eq__(self, x):
-        return self.prob == x.prob
+    # def __eq__(self, x):
+        # return self.prob == x.prob
 
-    def __lt__(self, x):
-        return self.prob < x.prob
+    # def __lt__(self, x):
+        # return self.prob < x.prob
 
-    def get_prob(self):
-        return self.prob
+    # def get_prob(self):
+        # return self.prob
 
-    def get_cont(self):
-        return self.cont
+    # def get_cont(self):
+        # return self.cont
 
-    def get_right_child(self):
-        return self.right_child
+    # def get_right_child(self):
+        # return self.right_child
 
-    def get_left_child(self):
-        return self.left_child
+    # def get_left_child(self):
+        # return self.left_child
 
-    def set_right_child(self, child):
-        self.right_child = child
+    # def set_right_child(self, child):
+        # self.right_child = child
 
-    def set_left_child(self, child):
-        self.left_child = child
-
-
-heap = []
-for key, var in prob_dict.items():
-    heap.append(Node(var, key))
-heapify(heap)
+    # def set_left_child(self, child):
+        # self.left_child = child
 
 
-while len(heap) != 1:
-    right_child = heappop(heap)
-    left_child = heappop(heap)
-    new_node = Node(right_child.get_prob() + left_child.get_prob())
-    new_node.set_right_child(right_child)
-    new_node.set_left_child(left_child)
-    heappush(heap, new_node)
-
-huff_code_dict = dict()
+# heap = []
+# for key, var in prob_dict.items():
+    # heap.append(Node(var, key))
+# heapify(heap)
 
 
-def gen_huff_codes(cur_code, node):
-    global huff_code_dict
-    if node.get_left_child() is not None:
-        gen_huff_codes(cur_code+'0', node.get_left_child())
-    if node.get_right_child() is not None:
-        gen_huff_codes(cur_code+'1', node.get_right_child())
-    else:
-        huff_code_dict[node.get_cont()] = cur_code
+# while len(heap) != 1:
+    # right_child = heappop(heap)
+    # left_child = heappop(heap)
+    # new_node = Node(right_child.get_prob() + left_child.get_prob())
+    # new_node.set_right_child(right_child)
+    # new_node.set_left_child(left_child)
+    # heappush(heap, new_node)
 
-gen_huff_codes('0b', heap[0])
+# huff_code_dict = dict()
+
+
+# def gen_huff_codes(cur_code, node):
+    # global huff_code_dict
+    # if node.get_left_child() is not None:
+        # gen_huff_codes(cur_code+'0', node.get_left_child())
+    # if node.get_right_child() is not None:
+        # gen_huff_codes(cur_code+'1', node.get_right_child())
+    # else:
+        # huff_code_dict[node.get_cont()] = cur_code
+
+# gen_huff_codes('0b', heap[0])
 
 
 
 out = BitArray()
 for b in kek:
-    out.append(huff_code_dict[b])
+    out.append(f'uint:16={b}')
 
 split = FILE_NAME.split('.')
 OUT_FILE = split[0] + '.lz'
@@ -165,5 +174,11 @@ OUT_FILE = split[0] + '.lz'
 with open(OUT_FILE, 'wb') as f:
     out.tofile(f)
 
+new_bytes = bytearray()
+with open(OUT_FILE, 'rb') as f:
+    new_bytes = bytearray(f.read())
 
 
+print(len(file_bytes))
+print(len(new_bytes))
+print((len(file_bytes)/len(new_bytes)))
