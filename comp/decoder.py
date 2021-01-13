@@ -1,4 +1,5 @@
 import sys
+import math
 from bitstring import BitArray, BitStream
 
 MAX_CODE_LEN = 65536

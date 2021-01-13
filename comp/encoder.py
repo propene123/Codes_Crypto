@@ -1,4 +1,5 @@
 import sys
+import math
 from bitstring import BitArray, BitStream
 from heapq import heapify, heappush, heappop
 from functools import total_ordering
@@ -66,6 +67,8 @@ def LZW(b_array):
         else:
             # output dict match
             out.append(f'uint:{symbol_width}={dictionary[tmp_buff]}')
+            # if math.ceil(math.log2(start_code)) > symbol_width and symbol_width < 16:
+                # symbol_width += 1
             code_len += 16
             if start_code < MAX_CODE_LEN:
                 old_c_ratio = ((comp_len-1)*8)/(code_len)
