@@ -1,7 +1,7 @@
 import sys
 from bitstring import BitArray, BitStream
 
-MAX_CODE_LEN = 4096
+MAX_CODE_LEN = 65536
 FILE_NAME = sys.argv[1]
 
 # Gen dict
@@ -32,6 +32,7 @@ def LZW_decode(in_codes):
     cur_char = dictionary[prev_code]
     out = []
     buff = b''
+    prev_match = cur_char
     out.append(cur_char)
     for i in range(1, len(in_codes)):
         cur_code = in_codes[i]
