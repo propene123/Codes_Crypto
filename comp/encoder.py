@@ -50,7 +50,7 @@ def gen_dict():
 
 def LZW(b_array):
     start_code = gen_dict()
-    symbol_width = 16
+    symbol_width = 9
     tmp_buff = b''
     out = BitArray()
     old_c_ratio = 0

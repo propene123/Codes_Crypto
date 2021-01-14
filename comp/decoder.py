@@ -44,7 +44,7 @@ def gen_dict():
 
 def LZW_decode(in_codes):
     new_key = gen_dict()
-    symbol_width = 16
+    symbol_width = 9
     prev_code = in_codes.read(f'uint:{symbol_width}')
     cur_char = dictionary[prev_code]
     out = []
@@ -54,6 +54,8 @@ def LZW_decode(in_codes):
     i = 1
     # for i in range(1, len(in_codes)):
     while in_codes.pos != in_codes.len:
+        if in_codes.len - in_codes.pos < symbol_width:
+            break
         cur_code = in_codes.read(f'uint:{symbol_width}')
         if cur_code not in dictionary:
             buff = dictionary[prev_code]
@@ -65,6 +67,8 @@ def LZW_decode(in_codes):
         if new_key < MAX_CODE_LEN:
             tmp = dictionary[prev_code] + cur_char
             dictionary[new_key] = tmp
+            if math.log2(new_key) == symbol_width and symbol_width < 16:
+                symbol_width += 1
             new_key += 1
         prev_code = cur_code
     return out
