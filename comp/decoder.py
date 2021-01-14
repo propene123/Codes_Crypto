@@ -2,7 +2,7 @@ import sys
 import math
 from bitstring import BitArray, BitStream
 
-MAX_CODE_LEN = 65536
+MAX_CODE_LEN = 2**16
 FILE_NAME = sys.argv[1]
 
 # Gen dict
@@ -51,12 +51,19 @@ def LZW_decode(in_codes):
     buff = b''
     prev_match = cur_char
     out.append(cur_char)
-    i = 1
-    # for i in range(1, len(in_codes)):
     while in_codes.pos != in_codes.len:
         if in_codes.len - in_codes.pos < symbol_width:
             break
         cur_code = in_codes.read(f'uint:{symbol_width}')
+        if cur_code == 256:
+            new_key = gen_dict()
+            symbol_width = 9
+            prev_code = in_codes.read(f'uint:{symbol_width}')
+            cur_char = dictionary[prev_code]
+            buff = b''
+            prev_match = cur_char
+            out.append(cur_char)
+            continue
         if cur_code not in dictionary:
             buff = dictionary[prev_code]
             buff += cur_char
