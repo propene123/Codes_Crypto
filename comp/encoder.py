@@ -93,6 +93,11 @@ out = BitArray()
 
 split = FILE_NAME.split('.')
 OUT_FILE = split[0] + '.lz'
+if len(kek) % 8 != 0:
+    for i in range(8-(len(kek) % 8)):
+        kek.append('0b0')
+
+
 
 with open(OUT_FILE, 'wb') as f:
     kek.tofile(f)
