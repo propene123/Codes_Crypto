@@ -98,13 +98,37 @@ in_stream = BitStream(infile)
 infile.close()
 
 
-
+bits_rem_from_stream = 0
 pad_bits = in_stream.read('uint:8')
+rle_blocks = in_stream.read('uint:9')
+bits_rem_from_stream += 17
 huff_code_lengths = []
-for i in range(256):
-    length = in_stream.read('uint:8')
-    if length != 0:
-        huff_code_lengths.append((i, length))
+current_huff_index = 0
+for i in range(rle_blocks):
+    rle_or_no = in_stream.read('uint:1')
+    bits_rem_from_stream += 1
+    if rle_or_no == 1:
+        rle_number = in_stream.read('uint:8')
+        rle_length = in_stream.read('uint:8')
+        bits_rem_from_stream += 16
+        for j in range(current_huff_index, current_huff_index+rle_number):
+            if rle_length != 0:
+                huff_code_lengths.append((j, rle_length))
+        current_huff_index += rle_number
+    if rle_or_no == 0:
+        rle_length = in_stream.read('uint:8')
+        bits_rem_from_stream += 8
+        if rle_length != 0:
+            huff_code_lengths.append((current_huff_index, rle_length))
+        current_huff_index += 1
+        
+
+
+
+# for i in range(256):
+    # length = in_stream.read('uint:8')
+    # if length != 0:
+        # huff_code_lengths.append((i, length))
 
 huff_code_lengths.sort(key=lambda x: (x[1], x[0]))
 huff_code_dict = dict()
@@ -118,7 +142,8 @@ for c in range(len(huff_code_lengths)):
 current_huff_code = 0
 current_code_len = 0
 test_out_bytes = BitArray()
-new_stream_len = len(in_stream) - 257 * 8
+# new_stream_len = len(in_stream) - 257 * 8
+new_stream_len = len(in_stream) - bits_rem_from_stream
 
 for i in range(new_stream_len):
     if i == new_stream_len - pad_bits:

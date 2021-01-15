@@ -214,18 +214,59 @@ out_huff_bytes = BitArray()
 for k in kek:
     out_huff_bytes.append(f'uint:{huff_code_dict[k][1]}={huff_code_dict[k][0]}')
 
-pad_bits = 8 - (len(out_huff_bytes) % 8)
-for i in range(pad_bits):
-    out_huff_bytes.append('0b0')
+# pad_bits = 8 - (len(out_huff_bytes) % 8)
+# for i in range(pad_bits):
+    # out_huff_bytes.append('0b0')
 
 huff_tree_enc = BitArray()
-for i in range(256):
-    if i not in huff_code_dict:
-        huff_tree_enc.append(f'uint:8={0}')
+
+i = 0
+rep_code = 1
+rle_blocks = 0
+prev_length = None
+sym_count = 0
+while i < 256:
+    if i in huff_code_dict:
+        current_length = huff_code_dict[i][1]
     else:
-        huff_tree_enc.append(f'uint:8={huff_code_dict[i][1]}')
+        current_length = 0
+    if current_length != prev_length or rep_code == 255:
+        if prev_length != None and rep_code > 1:
+            huff_tree_enc.append('0b1')
+            huff_tree_enc.append(f'uint:8={rep_code}')
+            huff_tree_enc.append(f'uint:8={prev_length}')
+            rle_blocks += 1
+            rep_code = 1
+        elif prev_length != None:
+            huff_tree_enc.append('0b0')
+            huff_tree_enc.append(f'uint:8={prev_length}')
+            rep_code = 1
+            rle_blocks += 1
+        prev_length = current_length
+    else:
+        rep_code += 1
+    i += 1
+if rep_code > 1:
+    huff_tree_enc.append('0b1')
+    huff_tree_enc.append(f'uint:8={rep_code}')
+    huff_tree_enc.append(f'uint:8={prev_length}')
+    rle_blocks += 1
+else:
+    huff_tree_enc.append('0b0')
+    huff_tree_enc.append(f'uint:8={prev_length}')
+    rle_blocks += 1
+# for i in range(256):
+    # if i not in huff_code_dict:
+        # huff_tree_enc.append(f'uint:8={0}')
+    # else:
+        # huff_tree_enc.append(f'uint:8={huff_code_dict[i][1]}')
+
 
 huff_tree_enc.append(out_huff_bytes)
+huff_tree_enc.prepend(f'uint:9={rle_blocks}')
+pad_bits = 8 - (len(huff_tree_enc) % 8)
+for i in range(pad_bits):
+    huff_tree_enc.append('0b0')
 huff_tree_enc.prepend(f'uint:8={pad_bits}')
 
 
