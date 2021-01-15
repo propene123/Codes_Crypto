@@ -114,14 +114,14 @@ with open(OUT_FILE, 'rb') as f:
 
 # This was huffman testing
 
-# prob_dict = dict()
-# for c in kek:
-    # if c in prob_dict:
-        # prob_dict[c] += 1
-    # else:
-        # prob_dict[c] = 1
-# for key, value in prob_dict.items():
-    # prob_dict[key] = value/len(kek)
+prob_dict = dict()
+for c in kek:
+    if c in prob_dict:
+        prob_dict[c] += 1
+    else:
+        prob_dict[c] = 1
+for key, value in prob_dict.items():
+    prob_dict[key] = value/len(kek)
 
 
 
@@ -161,21 +161,21 @@ class Node():
 
 # More huffman testing
 
-# heap = []
-# for key, var in prob_dict.items():
-    # heap.append(Node(var, key))
-# heapify(heap)
+heap = []
+for key, var in prob_dict.items():
+    heap.append(Node(var, key))
+heapify(heap)
 
 
-# while len(heap) != 1:
-    # right_child = heappop(heap)
-    # left_child = heappop(heap)
-    # new_node = Node(right_child.get_prob() + left_child.get_prob())
-    # new_node.set_right_child(right_child)
-    # new_node.set_left_child(left_child)
-    # heappush(heap, new_node)
+while len(heap) != 1:
+    right_child = heappop(heap)
+    left_child = heappop(heap)
+    new_node = Node(right_child.get_prob() + left_child.get_prob())
+    new_node.set_right_child(right_child)
+    new_node.set_left_child(left_child)
+    heappush(heap, new_node)
 
-# huff_code_dict = dict()
+huff_code_dict = dict()
 
 
 def gen_huff_codes(cur_code, node):
@@ -190,7 +190,14 @@ def gen_huff_codes(cur_code, node):
 
 # More huffman testing
 
-# gen_huff_codes('0b', heap[0])
+gen_huff_codes('0b', heap[0])
+
+huff_tuple_list = []
+for key, value in huff_code_dict.items():
+    huff_tuple_list.append((key, len(value)-2))
+
+huff_tuple_list.sort(key=lambda x: (x[1], x[0]))
+
 
 # huff_bytes = bytearray()
 # with open(OUT_FILE, 'rb') as f:
@@ -205,10 +212,5 @@ def gen_huff_codes(cur_code, node):
 
 # with open(OUT_FILE, 'rb') as f:
     # huff_bytes = bytearray(f.read())
-
-
-# print(len(file_bytes))
-# print(len(huff_bytes) + 255)
-# print(len(file_bytes)/(len(huff_bytes)+255))
 
 
