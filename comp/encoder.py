@@ -77,7 +77,6 @@ def LZW(b_array):
             if start_code == MAX_CODE_LEN:
                 new_c_ratio = ((comp_len-1)*8)/(code_len)
                 if (old_c_ratio/new_c_ratio) > c_threshold:
-                    print('RESET')
                     start_code = gen_dict()
                     # out clear code
                     out.append(f'uint:{symbol_width}=256')
@@ -90,17 +89,22 @@ def LZW(b_array):
 infile = open(FILE_NAME, 'rb')
 file_bytes = bytearray(infile.read())
 infile.close()
+split = FILE_NAME.split('.')
+OUT_FILE = split[0] + '.lz'
+
+if len(file_bytes) == 0:
+    with open(OUT_FILE, 'wb') as f:
+        f.write(file_bytes)
+    sys.exit('Input file contains 0 bytes will not compress. Writing original file as output with new name')
+
 kek = LZW(file_bytes)
 out = BitArray()
 # for b in kek:
     # out.append(f'uint:16={b}')
 
-split = FILE_NAME.split('.')
-OUT_FILE = split[0] + '.lz'
 if len(kek) % 8 != 0:
     for i in range(8-(len(kek) % 8)):
         kek.append('0b0')
-
 
 
 with open(OUT_FILE, 'wb') as f:
@@ -216,7 +220,10 @@ for i in range(pad_bits):
 
 huff_tree_enc = BitArray()
 for i in range(256):
-    huff_tree_enc.append(f'uint:8={huff_code_dict[i][1]}')
+    if i not in huff_code_dict:
+        huff_tree_enc.append(f'uint:8={0}')
+    else:
+        huff_tree_enc.append(f'uint:8={huff_code_dict[i][1]}')
 
 huff_tree_enc.append(out_huff_bytes)
 huff_tree_enc.prepend(f'uint:8={pad_bits}')
@@ -225,28 +232,29 @@ huff_tree_enc.prepend(f'uint:8={pad_bits}')
 with open(OUT_FILE, 'wb') as f:
     huff_tree_enc.tofile(f)
 
-# in_huff_stream = BitStream()
-# with open(OUT_FILE, 'rb') as f:
-    # in_huff_stream = BitStream(f)
 
-# new_huff_dict = dict()
-# for key, value in huff_code_dict.items():
-    # new_huff_dict[value[0]] = (key, value[1])
+in_huff_stream = BitStream()
+with open(OUT_FILE, 'rb') as f:
+    in_huff_stream = BitStream(f)
+
+new_huff_dict = dict()
+for key, value in huff_code_dict.items():
+    new_huff_dict[value[0]] = (key, value[1])
 
 
-# current_huff_code = 0
-# current_code_len = 0
-# test_out_bytes = BitArray()
-# for i in range(len(in_huff_stream)):
-    # if i == len(in_huff_stream) - pad_bits:
-        # break
-    # tmp_code_bit = in_huff_stream.read('uint:1')
-    # current_code_len+=1
-    # current_huff_code = (current_huff_code << 1)+tmp_code_bit
-    # if current_huff_code in new_huff_dict and current_code_len == new_huff_dict[current_huff_code][1]:
-        # test_out_bytes.append(f'uint:8={new_huff_dict[current_huff_code][0]}')
-        # current_huff_code = 0
-        # current_code_len = 0
+current_huff_code = 0
+current_code_len = 0
+test_out_bytes = BitArray()
+for i in range(len(in_huff_stream)):
+    if i == len(in_huff_stream) - pad_bits:
+        break
+    tmp_code_bit = in_huff_stream.read('uint:1')
+    current_code_len+=1
+    current_huff_code = (current_huff_code << 1)+tmp_code_bit
+    if current_huff_code in new_huff_dict and current_code_len == new_huff_dict[current_huff_code][1]:
+        test_out_bytes.append(f'uint:8={new_huff_dict[current_huff_code][0]}')
+        current_huff_code = 0
+        current_code_len = 0
 
 # with open(OUT_FILE, 'wb') as f:
     # test_out_bytes.tofile(f)

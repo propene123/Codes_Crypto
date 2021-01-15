@@ -84,18 +84,58 @@ def LZW_decode(in_codes):
 
 
 
+split = FILE_NAME.split('.')
+OUT_FILE = split[0] + '-decoded.tex'
+
+
 infile = open(FILE_NAME, 'rb')
+file_bytes = bytearray(infile.read())
+if len(file_bytes) == 0:
+    with open(OUT_FILE, 'wb') as f:
+        f.write(file_bytes)
+    sys.exit('input file has 0 bytes so will not decompress. Writing original file with new name')
 in_stream = BitStream(infile)
 infile.close()
-# in_codes = []
-# for i in range(len(in_stream) // 16):
-    # in_codes.append(in_stream.read('uint:16'))
 
+
+
+pad_bits = in_stream.read('uint:8')
+huff_code_lengths = []
+for i in range(256):
+    length = in_stream.read('uint:8')
+    if length != 0:
+        huff_code_lengths.append((i, length))
+
+huff_code_lengths.sort(key=lambda x: (x[1], x[0]))
+huff_code_dict = dict()
+current_huff_code = 0
+for c in range(len(huff_code_lengths)):
+    huff_code_dict[current_huff_code] = (huff_code_lengths[c][0], huff_code_lengths[c][1])
+    if c == len(huff_code_lengths) - 1:
+        break
+    current_huff_code = (current_huff_code + 1) << ((huff_code_lengths[c+1][1]) - (huff_code_lengths[c][1]))
+
+current_huff_code = 0
+current_code_len = 0
+test_out_bytes = BitArray()
+new_stream_len = len(in_stream) - 257 * 8
+
+for i in range(new_stream_len):
+    if i == new_stream_len - pad_bits:
+        break
+    tmp_code_bit = in_stream.read('uint:1')
+    current_code_len+=1
+    current_huff_code = (current_huff_code << 1)+tmp_code_bit
+    if current_huff_code in huff_code_dict and current_code_len == huff_code_dict[current_huff_code][1]:
+        test_out_bytes.append(f'uint:8={huff_code_dict[current_huff_code][0]}')
+        current_huff_code = 0
+        current_code_len = 0
+
+
+in_stream = BitStream(test_out_bytes)
 
 kek = LZW_decode(in_stream)
 
-split = FILE_NAME.split('.')
-OUT_FILE = split[0] + '-decoded.tex'
 
 
 with open(OUT_FILE, 'wb') as f:
