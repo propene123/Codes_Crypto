@@ -232,29 +232,3 @@ huff_tree_enc.prepend(f'uint:8={pad_bits}')
 with open(OUT_FILE, 'wb') as f:
     huff_tree_enc.tofile(f)
 
-
-in_huff_stream = BitStream()
-with open(OUT_FILE, 'rb') as f:
-    in_huff_stream = BitStream(f)
-
-new_huff_dict = dict()
-for key, value in huff_code_dict.items():
-    new_huff_dict[value[0]] = (key, value[1])
-
-
-current_huff_code = 0
-current_code_len = 0
-test_out_bytes = BitArray()
-for i in range(len(in_huff_stream)):
-    if i == len(in_huff_stream) - pad_bits:
-        break
-    tmp_code_bit = in_huff_stream.read('uint:1')
-    current_code_len+=1
-    current_huff_code = (current_huff_code << 1)+tmp_code_bit
-    if current_huff_code in new_huff_dict and current_code_len == new_huff_dict[current_huff_code][1]:
-        test_out_bytes.append(f'uint:8={new_huff_dict[current_huff_code][0]}')
-        current_huff_code = 0
-        current_code_len = 0
-
-# with open(OUT_FILE, 'wb') as f:
-    # test_out_bytes.tofile(f)
