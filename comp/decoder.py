@@ -37,6 +37,8 @@ def gen_dict():
     code = add_to_dict(code, 'height')
     code = add_to_dict(code, '\\sqrt')
     code = add_to_dict(code, '\\includegraphics')
+    code = add_to_dict(code, '\\documentclass')
+    code = add_to_dict(code, '\\usepackage')
     return code
 
 
